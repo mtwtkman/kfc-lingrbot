@@ -23,11 +23,12 @@ def index():
     return 'toriniku'
 
 def tori():
-  if datetime.now().day is 28:
+  today = datetime.now()
+  if today.day is 28:
     return '今日はとりの日パックだからはよ行って来い'
   else:
-    year, month, day = datetime.now().year, datetime.now().month, datetime.now().day
-    if datetime.now().day < 28:
+    year, month, day = today.year, today.month, today.day
+    if today.day < 28:
       left_days = timedelta(28 - day)
     else:
       last_day = monthrange(year, month)[1]
