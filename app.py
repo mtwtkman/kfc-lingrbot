@@ -1,7 +1,8 @@
 from flask import Flask, request
+#from bs4 import BeautifulSoup as bs
+#from urllib.request import urlopen
+#from datetime import datetime, date
 import json
-
-from tori import tori
 
 app = Flask(__name__)
 
@@ -12,7 +13,6 @@ def index():
     data = request.json
     if data['status'] == 'ok' and data['events']:
       msg = data['events'][0]['message']['text']
-
     return msg
 
   elif request.method == 'GET':
