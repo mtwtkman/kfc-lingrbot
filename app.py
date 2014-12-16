@@ -2,6 +2,7 @@
 
 from flask import Flask, request
 from datetime import date, datetime
+import re
 
 app = Flask(__name__)
 
@@ -9,11 +10,14 @@ app = Flask(__name__)
 def index():
   if request.method == 'POST':
     data = request.json
-    if data['status'] == 'ok' and 'KFC' in data['events'][0]['message']['text']:
-      return tori()
+
+    pattern = re.compile(r'.*[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
+
+    if data['status'] == 'ok':
+        if re.search(pattern, data['events'][0]['message']['text']):
+          return tori()
     else:
       pass
-
   elif request.method == 'GET':
     return 'toriniku'
 
