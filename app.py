@@ -9,7 +9,7 @@ app = Flask(__name__)
 def index():
   if request.method == 'POST':
     data = request.json
-    if data['status'] == ok and data['events']:
+    if data['status'] == 'ok' and data['events']:
       return data['events'][0]['message']['text']
     else:
       pass
