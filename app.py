@@ -2,6 +2,7 @@
 
 from flask import Flask, request
 from datetime import date, datetime
+from calendar import monthrange
 import re
 
 app = Flask(__name__)
@@ -29,12 +30,8 @@ def tori():
     if datetime.now().day < 28:
       left_days = date(year, month, 28) - date(year, month, day)
     else:
-      if month is 12:
-        new_year = year + 1
-        new_month = 1
-      else:
-        month += 1
-      left_days = date(new_year, new_month, 28) - date(year, month, day)
+      last_day = monthrange(year, month)[1]
+      left_days = last_day - day + 28
 
     if left_days.days-1 > 20:
       degree = 'だし結構'
