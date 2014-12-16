@@ -8,9 +8,9 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
   if request.method == 'POST':
-    return request.json['message']['text']
-    if 'KFC' in request.json['message']['text']:
-      return 'torinohi'
+    data = request.json
+    if data['status'] == ok and data['events']:
+      return data['events'][0]['message']['text']
     else:
       pass
   elif request.method == 'GET':
