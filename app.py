@@ -32,13 +32,13 @@ def tori():
         month += 1
       left_days = date(new_year, new_month, 28) - date(year, month, day)
 
-    if left_days.days > 20:
+    if left_days.days-1 > 20:
       degree = 'だし結構'
-    elif left_days.days > 5:
+    elif left_days.days-1 > 5:
       degree = 'なんだけどしばらく'
     else:
       degree = 'なんだからもうちょっと'
-    return 'とりの日パックまであと{}日{}我慢しろ'.format(left_days.days, degree)
+    return 'とりの日パックまであと{}日{}我慢しろ'.format(left_days.days-1, degree)
 
 
 if __name__ == '__main__':
