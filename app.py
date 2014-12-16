@@ -8,11 +8,13 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
   if request.method == 'POST':
+    msg = ''
     data = request.json
     if data['status'] == 'ok' and data['events']:
-      return data['events'][0]['message']['text']
-    else:
-      pass
+      msg = data['events'][0]['message']['text']
+
+    return msg
+
   elif request.method == 'GET':
     return 'toriniku'
 
