@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, request
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+import pytz
+from calendar import monthrange
 import re
 
 app = Flask(__name__)
@@ -22,19 +24,16 @@ def index():
     return 'toriniku'
 
 def tori():
-  if datetime.now().day is 28:
+  today = datetime.now(pytz.timezone('Asia/Tokyo'))
+  if today.day is 28:
     return '今日はとりの日パックだからはよ行って来い'
   else:
-    year, month, day = datetime.now().year, datetime.now().month, datetime.now().day
-    if datetime.now().day < 28:
-      left_days = date(year, month, 28) - date(year, month, day)
+    year, month, day = today.year, today.month, today.day
+    if today.day < 28:
+      left_days = timedelta(28 - day)
     else:
-      if month is 12:
-        new_year = year + 1
-        new_month = 1
-      else:
-        month += 1
-      left_days = date(new_year, new_month, 28) - date(year, month, day)
+      last_day = monthrange(year, month)[1]
+      left_days = timedelta(last_day - day + 28)
 
     if left_days.days-1 > 20:
       degree = 'だし結構'
