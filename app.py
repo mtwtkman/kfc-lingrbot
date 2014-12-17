@@ -2,6 +2,7 @@
 
 from flask import Flask, request
 from datetime import date, datetime, timedelta
+import pytz
 from calendar import monthrange
 import re
 
@@ -23,7 +24,7 @@ def index():
     return 'toriniku'
 
 def tori():
-  today = datetime.now()
+  today = datetime.now(pytz.timezone('Asia/Tokyo'))
   if today.day is 28:
     return '今日はとりの日パックだからはよ行って来い'
   else:
