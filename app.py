@@ -36,13 +36,12 @@ def tori():
       left_days = timedelta(last_day - day + 28)
 
     if left_days.days-1 > 20:
-      degree = 'だし結構'
+      degree = 'だしある程度'
     elif left_days.days-1 > 5:
       degree = 'なんだけどしばらく'
     else:
       degree = 'なんだからもうちょっと'
-    return 'とりの日パックまであと{}日{}我慢しろ'.format(left_days.days-1, degree)
-
+    return 'とりの日パックまであと{}日{}我慢しろ'.format(left_days.days, degree)
 
 if __name__ == '__main__':
-  app.run(debug=True)
+  app.run()
