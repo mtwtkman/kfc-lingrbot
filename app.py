@@ -13,7 +13,7 @@ def index():
   if request.method == 'POST':
     data = request.json
 
-    pattern = re.compile(r'.*[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
+    pattern = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
 
     if data['status'] == 'ok':
         if re.search(pattern, data['events'][0]['message']['text']):
