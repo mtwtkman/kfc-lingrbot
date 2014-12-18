@@ -3,10 +3,12 @@
 from flask import Flask, request
 from datetime import date, datetime, timedelta
 import pytz
+from kfc_msg import kfc_msg
 from calendar import monthrange
-import re
+import re, random
 
 app = Flask(__name__)
+app.debug = True
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -36,12 +38,12 @@ def tori():
       left_days = timedelta(last_day - day + 28)
 
     if left_days.days-1 > 20:
-      degree = 'だしある程度'
+      degree = 'far'
     elif left_days.days-1 > 5:
-      degree = 'なんだけどしばらく'
+      degree = 'middle'
     else:
-      degree = 'なんだからもうちょっと'
-    return 'とりの日パックまであと{}日{}我慢しろ'.format(left_days.days, degree)
+      degree = 'near'
+    return 'とりの日パックまであと{}日なんだけど{}'.format(left_days.days, random.choice(kfc_msg[degree]))
 
 if __name__ == '__main__':
   app.run()
