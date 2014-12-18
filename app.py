@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, request
+from flask.ext.sqlalchemy import SQLAlchemy
+
 from datetime import date, datetime, timedelta
 import pytz
-from kfc_msg import kfc_msg
 from calendar import monthrange
-import re, random
+import re, random, os
+
+from kfc_msg import kfc_msg
 
 app = Flask(__name__)
-app.debug = True
+app.config['DEBUG'] = True
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('HEROKU_POSTGRESQL_VIOLET_URL') if os.getenv('IS_HEROKU') else 'postgresql://boku:@localhost/toridb'
+
+db = SQLAlchemy(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
