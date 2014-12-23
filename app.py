@@ -52,18 +52,18 @@ def index():
       pattern = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
       if re.search(pattern, text):
         user = User.query.filter_by(username=username).first()
+        room = Room.query.filter_by(roomname=roomname).first()
         if user is None:
           user = User(username=username)
+        if room is None:
           room = Room(roomname=roomname, count=1, user=user)
-          db.session.add_all([user, room])
-        else:
           # ここ時限にしようかな
-          if user.rooms.filter_by(roomname=roomname).first().count is 10:
-            user.rooms.filter_by(roomname=roomname).first().count = 1
-            db.session.add(user)
-            return '{} さん、しつこい'.format(username)
-          user.rooms.filter_by(roomname=roomname).first().count += 1
+        elif user.rooms.filter_by(roomname=roomname).first().count is 10:
+          user.rooms.filter_by(roomname=roomname).first().count = 1
           db.session.add(user)
+          return '{} さん、しつこい'.format(username)
+          user.rooms.filter_by(roomname=roomname).first().count += 1
+        db.session.add_all([user, room])
         return tori()
   elif request.method == 'GET':
     return 'toriniku'
