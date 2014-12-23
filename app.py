@@ -58,10 +58,10 @@ def index():
         if room is None:
           room = Room(roomname=roomname, count=1, user=user)
           # ここ時限にしようかな
-        elif user.rooms.filter_by(roomname=roomname).first().count is 10:
+        elif user.rooms.filter_by(roomname=roomname).first().count is 5:
           user.rooms.filter_by(roomname=roomname).first().count = 1
           db.session.add(user)
-          return '{} さん、しつこい'.format(username)
+          #return '{} さん、しつこい'.format(username)
         user.rooms.filter_by(roomname=roomname).first().count += 1
         db.session.add_all([user, room])
         return tori()
