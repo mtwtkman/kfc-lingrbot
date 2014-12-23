@@ -62,7 +62,7 @@ def index():
           user.rooms.filter_by(roomname=roomname).first().count = 1
           db.session.add(user)
           return '{} さん、しつこい'.format(username)
-          user.rooms.filter_by(roomname=roomname).first().count += 1
+        user.rooms.filter_by(roomname=roomname).first().count += 1
         db.session.add_all([user, room])
         return tori()
   elif request.method == 'GET':
