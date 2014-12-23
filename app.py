@@ -51,19 +51,18 @@ def index():
       roomname = message_data['room']
       pattern = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
       if re.search(pattern, text):
-        user = User.query.filter_by(username=username).first()
-        room = Room.query.filter_by(roomname=roomname).first()
-        if user is None:
-          user = User(username=username)
-        if room is None:
-          room = Room(roomname=roomname, count=1, user=user)
-          # ここ時限にしようかな
-        elif user.rooms.filter_by(roomname=roomname).first().count is 5:
-          user.rooms.filter_by(roomname=roomname).first().count = 1
-          db.session.add(user)
-          #return '{} さん、しつこい'.format(username)
-        user.rooms.filter_by(roomname=roomname).first().count += 1
-        db.session.add_all([user, room])
+        #user = User.query.filter_by(username=username).first()
+        #room = Room.query.filter_by(roomname=roomname).first()
+        #if user is None:
+        #  user = User(username=username)
+        #if room is None:
+        #  room = Room(roomname=roomname, count=1, user=user)
+        #elif user.rooms.filter_by(roomname=roomname).first().count is 5:
+        #  user.rooms.filter_by(roomname=roomname).first().count = 1
+        #  db.session.add(user)
+        #  #return '{} さん、しつこい'.format(username)
+        #user.rooms.filter_by(roomname=roomname).first().count += 1
+        #db.session.add_all([user, room])
         return tori()
   elif request.method == 'GET':
     return 'toriniku'
