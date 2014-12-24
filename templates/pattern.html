@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pattern.css') }}" type="text/css">
+toriniku patterns
+<p>
+
+<table>
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>pattern</th>
+      <th>created_by</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for k, v in patterns.items() %}
+    <tr>
+      <td>{{ k }}</td>
+      <td>{{ v['pattern'] }} </td>
+      <td>{{ v['created_by'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

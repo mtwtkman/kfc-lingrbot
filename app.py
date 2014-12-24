@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
 from datetime import date, datetime, timedelta
 import pytz
@@ -22,7 +22,7 @@ class KFC(db.Model):
   created_by = db.Column(db.String(256))
 
   def __repr__(self):
-    return '<Pattern %r>' % self.pattern
+    return '<KFC Pattern %r>' % self.pattern
 
 class User(db.Model):
   __tablename__ = 'users'
@@ -108,6 +108,11 @@ def index():
   elif request.method == 'GET':
     return 'toriniku'
 # }}}
+
+@app.route('/pattern')
+def pattern():
+  patterns = {k.id: {'pattern': k.pattern, 'created_by': k.created_by} for k in KFC.query.all()}
+  return render_template('pattern.html', patterns=patterns)
 
 def tori(): # {{{
   kfc_msg = [k.pattern for k in KFC.query.all()]
