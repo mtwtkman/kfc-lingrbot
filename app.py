@@ -101,9 +101,10 @@ def index():
         db.session.add(kfc)
         return '{} さんが "{}" を登録しました。'.format(nickname, pattern)
       elif re.search(delete_pattern, text):
-        target = KFC.query.order_by('id desc').first()
-        db.session.delete(target)
-        return '"{}" を削除しました。'.format(target)
+        target = KFC.query.filter(KFC.id>18).order_by('id desc').first()
+        if target is not None:
+          db.session.delete(target)
+          return '"{}" を削除しました。'.format(target.pattern)
   elif request.method == 'GET':
     return 'toriniku'
 # }}}
