@@ -3,8 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from app import KFC
 
 import os
-
-engine = create_engine(os.getenv('POSTGRESQL_TORI'))
+engine = create_engine(os.getenv('HEROKU_POSTGRESQL_VIOLET_URL') if os.getenv('IS_HEROKU') else os.getenv('POSTGRESQL_TORI'))
 Session = sessionmaker(bind=engine)
 session = Session()
 
