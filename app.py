@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# config{{{
 from flask import Flask, request
 from flask.ext.sqlalchemy import SQLAlchemy
 from datetime import date, datetime, timedelta
 import pytz
 from calendar import monthrange
 import re, random, os
-from kfc_msg import kfc_msg
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -16,13 +14,38 @@ app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 
 db = SQLAlchemy(app)
 
-from models import User, Room
+# models {{{
+class KFC(db.Model):
+  __tablename__ = 'kfc'
+  id = db.Column(db.Integer, primary_key=True)
+  pattern = db.Column(db.String(256), unique=True)
+  created_by = db.Column(db.String(256))
 
+  def __repr__(self):
+    return '<Pattern %r>' % self.pattern
+
+class User(db.Model):
+  __tablename__ = 'users'
+  id = db.Column(db.Integer, primary_key=True)
+  username = db.Column(db.String(256), unique=True)
+  rooms = db.relationship('Room', backref='user', lazy='dynamic')
+
+  def __repr__(self):
+    return '<User %r>' % self.username
+
+class Room(db.Model):
+  __tablename__ = 'rooms'
+  id = db.Column(db.Integer, primary_key=True)
+  roomneme = db.Column(db.String(256), unique=True)
+  counter = db.Column(db.Integer)
+  user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+  def __repr__(self):
+    return '<Room %r>' % self.roomneme
 # }}}
 
 @app.route('/', methods=['GET', 'POST']) # {{{
 def index():
-  #signal()
   if request.method == 'POST':
     ''' Lingr API {{{
     {"status":"ok",
@@ -43,50 +66,50 @@ def index():
     }}} '''
 
     data = request.json
-
     if data['status'] == 'ok':
       message_data = request.json['events'][0]['message']
       text = message_data['text']
-      username = message_data['nickname']
-      roomname = message_data['room']
-      pattern = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
-      if re.search(pattern, text):
-        #user = User.query.filter_by(username=username).first()
-        #room = Room.query.filter_by(roomname=roomname).first()
-        #if user is None:
-        #  user = User(username=username)
-        #if room is None:
-        #  room = Room(roomname=roomname, count=1, user=user)
-        #elif user.rooms.filter_by(roomname=roomname).first().count is 5:
-        #  user.rooms.filter_by(roomname=roomname).first().count = 1
-        #  db.session.add(user)
-        #  #return '{} さん、しつこい'.format(username)
-        #user.rooms.filter_by(roomname=roomname).first().count += 1
-        #db.session.add_all([user, room])
+      nickname = message_data['nickname']
+      room = message_data['room']
+      kfc_hit = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
+      make_pattern = re.compile(r'(^!kfc)\s(.*$)')
+      delete_pattern = re.compile(r'^!kfc!!$')
+      if re.search(kfc_hit, text):
+        ''' kfc count{{{
+        user = User.query.filter_by(username=username).first()
+        if user is None:
+          user = User(username=username)
+          room = Room(roomname=roomname, count=1, user=user)
+          db.session.add_all([user, room])
+        else:
+          room = user.rooms.filter_by(roomname=roomname).first()
+          if room is None:
+            user.rooms.roomname = roomname
+            user.rooms.count = 0
+          elif room.count is 5:
+            room.count = 0
+            db.session.add(user)
+            #return '{} さん、しつこい'.format(username)
+          else:
+            room.count += 1
+          db.session.add(user)
+        }}} '''
         return tori()
+      elif re.search(make_pattern, text):
+        pattern = re.search(make_pattern, text).group(2)
+        kfc = KFC(pattern=pattern, created_by=nickname)
+        db.session.add(kfc)
+        return '{} さんが "{}" を登録しました。'.format(nickname, pattern)
+      elif re.search(delete_pattern, text):
+        target = KFC.query.order_by('id desc').first()
+        db.session.delete(target)
+        return '"{}" を削除しました。'.format(target)
   elif request.method == 'GET':
     return 'toriniku'
 # }}}
 
-''' signal(){{{
-def signal():
-  today = datetime.now(pytz.timezone('Asia/Tokyo'))
-
-  tori_day = 28
-  tori_day_signal = (0, 6, 12, 15, 18, 20)
-
-  before_day = 27
-  before_day_signal = (0, 6, 12, 15, 23)
-
-  if today.day is tori_day and today.minute is 0:
-    if today.hour in tori_day_signal:
-      return '今日は記念すべきとりの日です。満を持して行きましょう。'
-  elif today.day is before_day and today.minute is 0:
-    if today.hour in before_day_signal:
-      return '明日は待ちに待ったとりの日です。開店ダッシュしましょう。'
-}}} '''
-
 def tori(): # {{{
+  kfc_msg = [k.pattern for k in KFC.query.all()]
   today = datetime.now(pytz.timezone('Asia/Tokyo'))
   if today.day is 28:
     return '今日はとりの日パックだからはよ行って来い'
@@ -98,7 +121,7 @@ def tori(): # {{{
       last_day = monthrange(year, month)[1]
       left_days = timedelta(last_day - day + 28)
 
-    return 'とりの日パックまであと{}日なんだけど{}'.format(left_days.days, random.choice(kfc_msg))
+    return 'とりの日パックまであと{}日{}'.format(left_days.days, random.choice(kfc_msg))
 # }}}
 
 if __name__ == '__main__':
