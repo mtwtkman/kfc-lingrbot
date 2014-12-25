@@ -73,7 +73,7 @@ def index():
       room = message_data['room']
       kfc_hit = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
       make_pattern = re.compile(r'(^!kfc)\s(.+$)')
-      delete_pattern = re.compile(r'(^!kfc!!)\s([0-9]+$)')
+      modify_pattern = re.compile(r'(^!kfc!!)\s([0-9]+)(\s.+)?')
       if re.search(kfc_hit, text):
         ''' kfc count{{{
         user = User.query.filter_by(username=username).first()
@@ -100,12 +100,16 @@ def index():
         kfc = KFC(pattern=pattern, created_by=nickname)
         db.session.add(kfc)
         return '{} さんが "{}" を登録しました。'.format(nickname, pattern)
-      elif re.search(delete_pattern, text):
-        pattern_id = int(re.search(delete_pattern, text).group(2))
-        if pattern_id > 18:
-          target = KFC.query.filter(KFC.id==pattern_id).first()
-          db.session.delete(target)
-          return '"{}" を削除しました。'.format(target.pattern)
+      elif re.search(modify_pattern, text):
+        [_, ptn_id, new_ptn] = [i for i in re.search(modify_pattern, text).groups()]
+        target = KFC.query.get(int(ptn_id))
+        if int(ptn_id) > 18 and target is not None:
+          if new_ptn is None:
+            db.session.delete(target)
+            return '"{}" を削除しました。'.format(target.pattern)
+          else :
+            target.pattern = new_ptn
+            return 'id:{} のアレを変更しました。'.format(ptn_id)
   elif request.method == 'GET':
     return 'toriniku'
 # }}}
