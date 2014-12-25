@@ -72,8 +72,8 @@ def index():
       nickname = message_data['nickname']
       room = message_data['room']
       kfc_hit = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
-      make_pattern = re.compile(r'(^!kfc)\s(.*$)')
-      delete_pattern = re.compile(r'^!kfc!!$')
+      make_pattern = re.compile(r'(^!kfc)\s(.+$)')
+      delete_pattern = re.compile(r'(^!kfc!!)\s([0-9]+$)')
       if re.search(kfc_hit, text):
         ''' kfc count{{{
         user = User.query.filter_by(username=username).first()
@@ -101,18 +101,20 @@ def index():
         db.session.add(kfc)
         return '{} さんが "{}" を登録しました。'.format(nickname, pattern)
       elif re.search(delete_pattern, text):
-        target = KFC.query.filter(KFC.id>18).order_by('id desc').first()
-        if target is not None:
+        pattern_id = int(re.search(delete_pattern, text).group(2))
+        if pattern_id > 18:
+          target = KFC.query.filter(KFC.id==pattern_id).first()
           db.session.delete(target)
           return '"{}" を削除しました。'.format(target.pattern)
   elif request.method == 'GET':
     return 'toriniku'
 # }}}
 
-@app.route('/pattern')
+@app.route('/pattern') # {{{
 def pattern():
   patterns = {k.id: {'pattern': k.pattern, 'created_by': k.created_by} for k in KFC.query.all()}
   return render_template('pattern.html', patterns=patterns)
+# }}}
 
 def tori(): # {{{
   kfc_msg = [k.pattern for k in KFC.query.all()]
