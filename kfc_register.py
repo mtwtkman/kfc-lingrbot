@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app import KFC
@@ -15,6 +16,6 @@ kfc_msg = ('なんだけどある程度我慢を覚えろよ', 'なんだけど�
            'なんだけど待ちきれないかな？じゃあクソして寝ろ', 'なんだけどそれも定かではない', 'なんだけどちゃんと野菜食ってるか?',
 )
 
-messages = [KFC(pattern=msg, created_by='boku') for msg in kfc_msg]
+messages = [KFC(ptn_id=int(i+1), pattern=msg, created_by='boku') for i, msg in enumerate(kfc_msg)]
 session.add_all(messages)
 session.commit()
