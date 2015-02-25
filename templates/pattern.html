@@ -1,25 +1,31 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='css/pattern.css') }}" type="text/css">
-<div id="base">
-toriniku patterns</br>
-base sentence is: とりの日パックまであとn日
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pattern.css') }}" type="text/css">
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/bootstrap/css/bootstrap.min.css') }}" type="text/css">
+<script src="{{ url_for('static', filename='assets/js/jquery.min.js') }}"></script>
+<div id="head">
+  toriniku patterns</br>
+  base sentence is: とりの日パックまであとn日 &lt;pattern&gt;
 </div>
 <div id="main">
-<table>
-  <thead>
-    <tr>
-      <th>id</th>
-      <th>pattern</th>
-      <th>created_by</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for k, v in patterns.items() %}
-    <tr>
-      <td>{{ k }}</td>
-      <td>{{ v['pattern'] }} </td>
-      <td>{{ v['created_by'] }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  <div class="row">
+    <div class="span9 offset4">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>pattern</th>
+            <th>created_by</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for k, v in patterns.items() %}
+          <tr>
+            <td>{{ k }}</td>
+            <td>{{ v['pattern'] }} </td>
+            <td>{{ v['created_by'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

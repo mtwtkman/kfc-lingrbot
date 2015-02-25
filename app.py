@@ -2,17 +2,25 @@
 
 from flask import Flask, request, render_template
 from flask.ext.sqlalchemy import SQLAlchemy
-from datetime import date, datetime, timedelta
+from flask.ext.wtf import Form
+from wtforms import TextField, SubmitField
+
+from datetime import datetime, timedelta
 import pytz
 from calendar import monthrange
-import re, random, os
+import re
+import random
+import os
+import string
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('HEROKU_POSTGRESQL_VIOLET_URL') if os.getenv('IS_HEROKU') else os.getenv('POSTGRESQL_TORI')
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
+app.config['SECRET_KEY'] = ''.join([random.choice(string.ascii_letters+string.digits) for i in range(50)])
 
 db = SQLAlchemy(app)
+
 
 # models {{{
 class KFC(db.Model):
@@ -25,6 +33,7 @@ class KFC(db.Model):
     def __repr__(self):
         return '<KFC Pattern %r>' % self.pattern
 
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -33,6 +42,7 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
+
 
 class Room(db.Model):
     __tablename__ = 'rooms'
@@ -45,7 +55,15 @@ class Room(db.Model):
         return '<Room %r>' % self.roomneme
 # }}}
 
-@app.route('/', methods=['GET', 'POST']) # {{{
+
+# forms {{{
+class EditForm(Form):
+    pattern = TextField('text')
+    edit = SubmitField('submit')
+# }}}
+
+
+@app.route('/', methods=['GET', 'POST'])  # {{{
 def index():
     if request.method == 'POST':
         ''' Lingr API {{{
@@ -70,7 +88,7 @@ def index():
             message_data = request.json['events'][0]['message']
             text = message_data['text']
             nickname = message_data['nickname']
-            room = message_data['room']
+            # room = message_data['room']
             # pattern{{{
             kfc_hit = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
             make_pattern = re.compile(r'(^!kfc)\s(.+$)')
@@ -87,12 +105,10 @@ def index():
                     return '重複してますよ。'
                 ptn_id_list = sorted([i.ptn_id for i in KFC.query.filter(KFC.ptn_id>0).all()])
                 ptn_id = max(ptn_id_list) + 1
-                print(ptn_id)
                 for i in range(1, ptn_id):
                     if ptn_id_list[i-1] is not i:
                         ptn_id = i
                         break
-                print(ptn_id)
                 kfc = KFC(ptn_id=ptn_id, pattern=pattern, created_by=nickname)
                 db.session.add(kfc)
                 db.session.commit()
@@ -123,20 +139,23 @@ def index():
                     return '登録のないidです。'
 
             elif re.search(help_pattern, text):
-                return '\n'.join(['とりの日:', '  KFCを含むメッセージ', '作成:', '  !kfc メッセージ',
-                                  '変更:', '  !kfc! id メッセージ', '削除:', '  !kfc!! id',
-                                  '検索:', '  !kfc? id']).strip()
+                return '\n'.join(['とりの日:', 'KFCを含むメッセージ', '作成:', '!kfc メッセージ',
+                                  '変更:', '!kfc! id メッセージ', '削除:', '!kfc!! id',
+                                  '検索:', '!kfc? id', 'パターン一覧:', 'http://toriniku.herokuapp.com/pattern'])
     elif request.method == 'GET':
         return 'toriniku'
 # }}}
 
-@app.route('/pattern') # {{{
+
+@app.route('/pattern', methods=['GET', 'POST'])  # {{{
 def pattern():
+    form = EditForm()
     patterns = {k.ptn_id: {'pattern': k.pattern, 'created_by': k.created_by} for k in KFC.query.all()}
     return render_template('pattern.html', patterns=patterns)
 # }}}
 
-def tori(): # {{{
+
+def tori():  # {{{
     kfc_msg = [k.pattern for k in KFC.query.all()]
     today = datetime.now(pytz.timezone('Asia/Tokyo'))
     if today.day is 28:

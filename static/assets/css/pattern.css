@@ -1,0 +1,27 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
+
+div#head {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: white;
+  width: 100%;
+  height: 40px;
+  font-size: large;
+  padding: 10 0 10 10;
+}
+
+div#main {
+  height: 100%;
+  padding-top: 60px;
+  overflow: auto;
+}
