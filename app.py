@@ -92,9 +92,9 @@ def index():
             # pattern{{{
             kfc_hit = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
             create_pattern = re.compile(r'(^!kfc-c(reate)?)\s(.+$)')
+            read_patternn = re.compile(r'(^!kfc-r(ead)?)\s([0-9]+)$')
             update_pattern = re.compile(r'(^!kfc-u(pdate)?)\s([0-9]+)\s(.+)?')
             delete_pattern = re.compile(r'(^!kfc-d(elete)?)\s([0-9]+)$')
-            search_pattern = re.compile(r'(^!kfc-s(earch)?)\s([0-9]+)$')
             help_pattern = re.compile(r'^!kfc-h(elp)?$')
             # }}}
             if re.search(kfc_hit, text):
@@ -113,6 +113,13 @@ def index():
                 db.session.add(kfc)
                 db.session.commit()
                 return '{nickname} さんが "{pattern}" を登録しました。(id: {ptn_id})\n出力例: とりの日パックまであとn日{pattern}'.format(nickname=nickname, pattern=pattern, ptn_id=ptn_id)
+            elif re.search(read_patternn, text):
+                ptn_id = int(re.search(read_patternn, text).group(3))
+                target = KFC.query.filter_by(ptn_id=int(ptn_id)).first()
+                if target:
+                    return 'id:{ptn_id}は{created_by}さんが作成しました。\n出力例: とりの日パックまであとn日{pattern}'.format(ptn_id=ptn_id, created_by=target.created_by, pattern=target.pattern)
+                else:
+                    return '登録のないidです。'
             elif re.search(update_pattern, text):
                 [_, _, ptn_id, new_ptn] = [i for i in re.search(update_pattern, text).groups()]
                 if KFC.query.filter_by(pattern=new_ptn).first():
@@ -133,19 +140,11 @@ def index():
                     return '{created_by}さんが作成したid:{ptn_id}\n"{pattern}"を{nickname}さんが削除しました。'.format(created_by=target.created_by, ptn_id=ptn_id, pattern=target.pattern, nickname=nickname)
                 else:
                     return '登録のないidです。'
-            elif re.search(search_pattern, text):
-                ptn_id = int(re.search(search_pattern, text).group(3))
-                target = KFC.query.filter_by(ptn_id=int(ptn_id)).first()
-                if target:
-                    return 'id:{ptn_id}は{created_by}さんが作成しました。\n出力例: とりの日パックまであとn日{pattern}'.format(ptn_id=ptn_id, created_by=target.created_by, pattern=target.pattern)
-                else:
-                    return '登録のないidです。'
-
             elif re.search(help_pattern, text):
                 return '\n'.join(['作成:', '!kfc-c(reate) <text>',
+                                  '検索:', '!kfc-r(ead) <id>',
                                   '変更:', '!kfc-u(pdate) <id> <text>',
                                   '削除:', '!kfc-d(elete) <id>',
-                                  '検索:', '!kfc-s(earch) <id>',
                                   'パターン一覧:', 'http://toriniku.herokuapp.com/pattern'])
     elif request.method == 'GET':
         return 'toriniku'
