@@ -91,16 +91,16 @@ def index():
             # room = message_data['room']
             # pattern{{{
             kfc_hit = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
-            make_pattern = re.compile(r'(^!kfc)\s(.+$)')
-            modify_pattern = re.compile(r'(^!kfc!)\s([0-9]+)\s(.+)?')
-            remove_pattern = re.compile(r'(^!kfc!!)\s([0-9]+)$')
-            search_pattern = re.compile(r'(^!kfc\?)\s([0-9]+)')
-            help_pattern = re.compile(r'^!kfc-help$')
+            create_pattern = re.compile(r'(^!kfc-c(reate)?)\s(.+$)')
+            update_pattern = re.compile(r'(^!kfc-u(pdate)?)\s([0-9]+)\s(.+)?')
+            delete_pattern = re.compile(r'(^!kfc-d(elete)?)\s([0-9]+)$')
+            search_pattern = re.compile(r'(^!kfc-s(earch)?)\s([0-9]+)$')
+            help_pattern = re.compile(r'^!kfc-h(elp)?$')
             # }}}
             if re.search(kfc_hit, text):
                 return tori()
-            elif re.search(make_pattern, text):
-                pattern = re.search(make_pattern, text).group(2)
+            elif re.search(create_pattern, text):
+                pattern = re.search(create_pattern, text).group(3)
                 if KFC.query.filter_by(pattern=pattern).first():
                     return '重複してますよ。'
                 ptn_id_list = sorted([i.ptn_id for i in KFC.query.filter(KFC.ptn_id>0).all()])
@@ -112,42 +112,47 @@ def index():
                 kfc = KFC(ptn_id=ptn_id, pattern=pattern, created_by=nickname)
                 db.session.add(kfc)
                 db.session.commit()
-                return '{} さんが "{}" を登録しました。(id: {})'.format(nickname, pattern, ptn_id)
-            elif re.search(modify_pattern, text):
-                [_, ptn_id, new_ptn] = [i for i in re.search(modify_pattern, text).groups()]
+                return '{nickname} さんが "{pattern}" を登録しました。(id: {ptn_id})\n出力例: とりの日パックまであとn日{pattern}'.format(nickname=nickname, pattern=pattern, ptn_id=ptn_id)
+            elif re.search(update_pattern, text):
+                [_, _, ptn_id, new_ptn] = [i for i in re.search(update_pattern, text).groups()]
                 if KFC.query.filter_by(pattern=new_ptn).first():
                     return '重複してますよ。'
                 target = KFC.query.filter_by(ptn_id=int(ptn_id)).first()
                 if target:
                     target.pattern = new_ptn
-                    return 'id:{}を{}さんが変更しました。' .format(ptn_id, nickname)
-            elif re.search(remove_pattern, text):
-                ptn_id = int(re.search(remove_pattern, text).group(2))
+                    return '{nickname}さんがid:{ptn_id}を変更しました。\n出力例: とりの日パックまであとn日{new_ptn}' .format(nickname=nickname, ptn_id=ptn_id, new_ptn=new_ptn)
+                else:
+                    return '登録のないidです。'
+            elif re.search(delete_pattern, text):
+                ptn_id = int(re.search(delete_pattern, text).group(3))
                 target = KFC.query.filter_by(ptn_id=ptn_id).first()
+                print(target)
                 if target:
                     db.session.delete(target)
                     db.session.commit()
-                    return '{}さんが作成したid:{}\n"{}"を{}さんが削除しました。'.format(target.created_by, ptn_id, target.pattern, nickname)
+                    return '{created_by}さんが作成したid:{ptn_id}\n"{pattern}"を{nickname}さんが削除しました。'.format(created_by=target.created_by, ptn_id=ptn_id, pattern=target.pattern, nickname=nickname)
                 else:
                     return '登録のないidです。'
             elif re.search(search_pattern, text):
-                ptn_id = int(re.search(search_pattern, text).group(2))
+                ptn_id = int(re.search(search_pattern, text).group(3))
                 target = KFC.query.filter_by(ptn_id=int(ptn_id)).first()
                 if target:
-                    return 'id:{}は{}さんが作成しました。\ntext: {}'.format(ptn_id, target.created_by, target.pattern)
+                    return 'id:{ptn_id}は{created_by}さんが作成しました。\n出力例: とりの日パックまであとn日{pattern}'.format(ptn_id=ptn_id, created_by=target.created_by, pattern=target.pattern)
                 else:
                     return '登録のないidです。'
 
             elif re.search(help_pattern, text):
-                return '\n'.join(['とりの日:', 'KFCを含むメッセージ', '作成:', '!kfc メッセージ',
-                                  '変更:', '!kfc! id メッセージ', '削除:', '!kfc!! id',
-                                  '検索:', '!kfc? id', 'パターン一覧:', 'http://toriniku.herokuapp.com/pattern'])
+                return '\n'.join(['作成:', '!kfc-c(reate) <text>',
+                                  '変更:', '!kfc-u(pdate) <id> <text>',
+                                  '削除:', '!kfc-d(elete) <id>',
+                                  '検索:', '!kfc-s(earch) <id>',
+                                  'パターン一覧:', 'http://toriniku.herokuapp.com/pattern'])
     elif request.method == 'GET':
         return 'toriniku'
 # }}}
 
 
-@app.route('/pattern', methods=['GET', 'POST'])  # {{{
+@app.route('/pattern')  # {{{
 def pattern():
     form = EditForm()
     patterns = {k.ptn_id: {'pattern': k.pattern, 'created_by': k.created_by} for k in KFC.query.all()}
