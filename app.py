@@ -180,7 +180,6 @@ def tori():  # {{{
 
 def marukame():  # {{{
     today = datetime.now(pytz.timezone('Asia/Tokyo'))
-    import pdb; pdb.set_trace()
     if today.day is 1:
         return '今日は丸亀製麺の釜揚げうどんが半額ですよ！！！急いで！！！'
     else:
