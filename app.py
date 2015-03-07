@@ -185,7 +185,7 @@ def marukame():  # {{{
     else:
         year, month, day = today.year, today.month, today.day
         last_day = monthrange(year, month)[1]
-        left_days = timedelta(last_day - day)
+        left_days = timedelta(last_day-day+1)
         return 'ところで、物の本によると丸亀製麺の釜揚げうどん半額まであと{}日なんだってね'.format(left_days.days)
 # }}}
 
