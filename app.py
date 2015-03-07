@@ -91,6 +91,7 @@ def index():
             # room = message_data['room']
             # pattern{{{
             kfc_hit = re.compile(r'[KＫ][･・]?[FＦ][･・]?[CＣ][!！]?')
+            marukame_hit = re.compile(r'^!kfc-udon$')
             create_pattern = re.compile(r'(^!kfc-c(reate)?)\s(.+$)')
             read_patternn = re.compile(r'(^!kfc-r(ead)?)\s([0-9]+)$')
             update_pattern = re.compile(r'(^!kfc-u(pdate)?)\s([0-9]+)\s(.+)?')
@@ -99,6 +100,8 @@ def index():
             # }}}
             if re.search(kfc_hit, text):
                 return tori()
+            elif re.search(marukame_hit, text):
+                return marukame()
             elif re.search(create_pattern, text):
                 pattern = re.search(create_pattern, text).group(3)
                 if KFC.query.filter_by(pattern=pattern).first():
@@ -153,7 +156,7 @@ def index():
 
 @app.route('/pattern')  # {{{
 def pattern():
-    form = EditForm()
+    # form = EditForm()
     patterns = {k.ptn_id: {'pattern': k.pattern, 'created_by': k.created_by} for k in KFC.query.all()}
     return render_template('pattern.html', patterns=patterns)
 # }}}
@@ -172,6 +175,19 @@ def tori():  # {{{
             last_day = monthrange(year, month)[1]
             left_days = timedelta(last_day - day + 28)
         return 'とりの日パックまであと{}日{}'.format(left_days.days, random.choice(kfc_msg))
+# }}}
+
+
+def marukame():  # {{{
+    today = datetime.now(pytz.timezone('Asia/Tokyo'))
+    import pdb; pdb.set_trace()
+    if today.day is 1:
+        return '今日は丸亀製麺の釜揚げうどんが半額ですよ！！！急いで！！！'
+    else:
+        year, month, day = today.year, today.month, today.day
+        last_day = monthrange(year, month)[1]
+        left_days = timedelta(last_day - day)
+        return 'ところで、物の本によると丸亀製麺の釜揚げうどん半額まであと{}日なんだってね'.format(left_days.days)
 # }}}
 
 if __name__ == '__main__':
